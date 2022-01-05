@@ -6,7 +6,7 @@ import support_library_v1 as sl
 from curtsies import Input
 import sys
 #commento
-# nuovo commento
+# nuovo commento commento spazzola
 def get_list_index(list, index):
     if index < len(list) and index >= 0:
         return list[index]
