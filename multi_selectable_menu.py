@@ -4,8 +4,8 @@
 
 import support_library_v1 as sl
 from curtsies import Input
-import sys
-#no comment
+
+
 def get_list_index(list, index):
     if index < len(list) and index >= 0:
         return list[index]
@@ -84,52 +84,39 @@ class Multi_level_menu:
         self.__root = self.__create_tree(menu_map)
         self.sel_char = selected_pre_items_char[0]
         self.def_char = default_pre_items_char[0]
-        self.__address = self.__calculate_address_lenght()
+        self.__address = self.__calculate_address_lenght()        
 
-    # def __init__(self, root, default_pre_items_char='-', selected_pre_items_char='#') -> None: # ! DA TOGLIERE
-    #     self.__root = root
-    #     self.sel_char = selected_pre_items_char[0]
-    #     self.def_char = default_pre_items_char[0]
-    #     self.__address = self.__calculate_address_lenght()
-
-
-    def __create_tree(tree_map) -> Node_menu:
-        def create_branch(branch_map):
-            ret_menu_nodes = []
+    def __create_tree(self, tree_map) -> Node_menu:
+        def create_branch(branch_map, parent_node):            
             opened_brachets = 0
             open_ = False       # true whene there is a brachets
             str_branch = ''
-            for char in branch_map:
+            for i, char in enumerate(branch_map):
                 if char == '(': 
                     opened_brachets += 1
                     open_ = True
                 elif char == ')': 
                     opened_brachets -= 1
-                elif char == '-' and opened_brachets == 0 and open_ == True: # qui c'è un nodo con altri sotto-nodi
-                    ret_menu_nodes = create_branch(str_branch)
-                    
+                #? selmpificare gli elif sotto
+                if (char == '-' and opened_brachets == 0 or i == len(branch_map)-1) and open_ == True: # qui c'è un nodo con altri sotto-nodi
+                    if i == len(branch_map)-1: str_branch += char
+                    child_node = Node_menu(str_branch[:str_branch.find('(')])
+                    create_branch(str_branch[str_branch.find('(')+1:-1], child_node)
+                    parent_node.add_child(child_node)
                     open_ = False
-                    str_branch = ''
-                    pass
-                elif char == '-' and opened_brachets == 0 and open_ == False: # qui c'è un nodo finale
-                    ret_menu_nodes = Node_menu(str_branch)
-                    str_branch = ''
-                    pass
-                str_branch += char
-            return ret_menu_nodes            
+                    str_branch = ''    
+                    continue            
+                elif (char == '-' and opened_brachets == 0 or i == len(branch_map)-1) and open_ == False: # qui c'è un nodo finale                    
+                    if i == len(branch_map)-1: str_branch += char
+                    parent_node.add_child(Node_menu(str_branch))
+                    str_branch = ''                    
+                    continue
+                str_branch += char            
 
-        opened_brachets = 0
-        str_branch = ''
-        root = Node_menu('root')
-
-        for char in tree_map:     #? ciclo per individuare i figli della root
-            if char == '(': opened_brachets += 1
-            elif char == ')': opened_brachets -= 1
-            if char == '-' and opened_brachets == 0:
-                root.add_child(create_branch(str_branch))
-                str_branch = ''
-                continue
-            str_branch += char                    
+        root = Node_menu('@')
+        create_branch(tree_map, root)       
+        return root
+                           
 
     def __calculate_address_lenght(self):
         address = [0]
@@ -197,36 +184,11 @@ class Multi_level_menu:
                 self.__root.print_tree(sel_item_address=self.__address)
 
 
-def create_tree():
-    root = Node_menu('@')
 
-    y = Node_menu('first')
-    x = Node_menu('first first')
-    x.add_child(Node_menu('first first first'))
-    x.add_child(Node_menu('first first second'))
-    y.add_child(x)
-    root.add_child(y)
 
-    b = Node_menu('second')
-    b.add_child(Node_menu('second first'))
-    sb = Node_menu('second second')
-    l = Node_menu('second second first')
-    l.add_child(Node_menu('second second first first'))
-    sb.add_child(l)
-    sb.add_child(Node_menu('second second first'))
-    sb.add_child(Node_menu('second second second'))
-    sb.add_child(Node_menu('second second third'))
-    b.add_child(sb)
-    root.add_child(b)
-    return root
-
-def recursion():
-    def sub():
-        print('ciao')
 
 if __name__ == '__main__':    
-    recursion()
-    #m = Multi_level_menu(menu_map='fisrt(f first-f second)-second(s first-s second=')
-    #m = Multi_level_menu(root=create_tree())
-    #m.start_menu()    
+    sl.clear()
+    m = Multi_level_menu(menu_map='fi(ff-ss)-sec(cc-dd)')    
+    m.start_menu()    
     pass
