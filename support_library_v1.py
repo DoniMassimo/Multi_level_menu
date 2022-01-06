@@ -1,6 +1,10 @@
 import os
 
 
+def get_list_index(list, index):
+    if index < len(list) and index >= 0:
+        return list[index]
+    else: return False
 ##
 ##### CUSTOM PRINT
 def clear():  
