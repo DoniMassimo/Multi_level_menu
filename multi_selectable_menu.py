@@ -87,7 +87,7 @@ class Multi_level_menu:
         self.__address = self.__calculate_address_lenght()        
 
     def __create_tree(self, tree_map) -> Node_menu:
-        def create_branch(branch_map, parent_node):            
+        def create_branchs(branch_map, parent_node):            
             opened_brachets = 0
             open_ = False       # true whene there is a brachets
             str_branch = ''
@@ -96,28 +96,23 @@ class Multi_level_menu:
                     opened_brachets += 1
                     open_ = True
                 elif char == ')': 
-                    opened_brachets -= 1
-                #? selmpificare gli elif sotto
-                if (char == '-' and opened_brachets == 0 or i == len(branch_map)-1) and open_ == True: # qui c'è un nodo con altri sotto-nodi
+                    opened_brachets -= 1                
+                if (char == '-' and opened_brachets == 0 or i == len(branch_map)-1): 
                     if i == len(branch_map)-1: str_branch += char
-                    child_node = Node_menu(str_branch[:str_branch.find('(')])
-                    create_branch(str_branch[str_branch.find('(')+1:-1], child_node)
-                    parent_node.add_child(child_node)
-                    open_ = False
-                    str_branch = ''    
-                    continue            
-                elif (char == '-' and opened_brachets == 0 or i == len(branch_map)-1) and open_ == False: # qui c'è un nodo finale                    
-                    if i == len(branch_map)-1: str_branch += char
-                    parent_node.add_child(Node_menu(str_branch))
-                    str_branch = ''                    
-                    continue
+                    if open_ == True:       # qui c'è un nodo con altri sotto-nodi
+                        child_node = Node_menu(str_branch[:str_branch.find('(')])
+                        create_branchs(str_branch[str_branch.find('(')+1:-1], child_node)
+                        parent_node.add_child(child_node)
+                        open_ = False                          
+                    else:       # nodo finale
+                        parent_node.add_child(Node_menu(str_branch))
+                    str_branch = ''
+                    continue       
                 str_branch += char            
-
         root = Node_menu('@')
-        create_branch(tree_map, root)       
+        create_branchs(tree_map, root)       
         return root
                            
-
     def __calculate_address_lenght(self):
         address = [0]
         for i in range(self.__root.get_max_level()-1):
@@ -185,10 +180,8 @@ class Multi_level_menu:
 
 
 
-
-
 if __name__ == '__main__':    
     sl.clear()
-    m = Multi_level_menu(menu_map='fi(ff-ss)-sec(cc-dd)')    
+    m = Multi_level_menu(menu_map='fi(ff-ss)-sec(cc-dd(rr(ww-ee-tt)-mm))')    
     m.start_menu()    
     pass
