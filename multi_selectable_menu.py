@@ -2,15 +2,13 @@
 # librery to install to use this library
 #   curtsies -> terminal command : 'pip install curtsies'
 
+from os import terminal_size
 import support_library_v1 as sl
 from curtsies import Input
 
-
-def get_list_index(list, index):
-    if index < len(list) and index >= 0:
-        return list[index]
-    else: return False
-
+##
+##### NODE
+##
 class Node:  # simply node
     def __init__(self, data) -> None:
         self._data = data
@@ -21,13 +19,16 @@ class Node:  # simply node
         child._parent = self
         self._children.append(child)
 
-
+##
+##### NODE_MENU
+##
 class Node_menu(Node): 
     # node with functions for creating tree menus
     # every func works locally, so we can call func for every node and not only for the root
     def __init__(self, data) -> None:
         super().__init__(data)
-
+    ##
+    ##### PUBLIC METHODS
     def get_level(self):
         level = 0
         par = self._parent
@@ -36,22 +37,20 @@ class Node_menu(Node):
             par = par._parent
         return level
 
+    def is_leaf(self):
+        return False if self._children else True
+    
     def get_data(self):
         return self._data
 
-    def print_tree(self, sel_item_address, index=0, tab='', selected_item=True): # sel = selected
-        sel_char = '#'
-        def_char = '-'
-        if selected_item==True and (get_list_index(sel_item_address, index) == -1 or index == len(sel_item_address)):             
-            print(f'{tab}{sel_char}{self._data}')            
-        else:
-            print(f'{tab}{def_char}{self._data}')
-        if self._children:
-            for i, child in enumerate(self._children):
-                if i == sel_item_address[index] and selected_item:
-                    child.print_tree(sel_item_address, index+1, tab=tab+'  ', selected_item=True)
-                else:
-                    child.print_tree(sel_item_address, index+1, tab=tab+'  ', selected_item=False)
+    def is_leaf_the_address(self, address, index=0):
+        return self.__get_node_of_address(address, index).is_leaf()  
+
+    def get_level_of_address(self, address, index=0):
+        return self.__get_node_of_address(address, index).get_level()
+
+    def get_data_of_address(self, address, index=0): 
+        return self.__get_node_of_address(address, index).get_data()   
 
     def get_max_level(self, level=-1, record_level=-1):
         level += 1
@@ -76,7 +75,33 @@ class Node_menu(Node):
         else: 
             return False
 
+    def print_tree(self, sel_item_address, index=0, tab=-1, selected_item=True): # sel = selected
+        sel_char = '#' #! questi parametri vanno passati
+        def_char = '-'
+        tab_char = '  '
+        if self._data != 'root__': # per non stampare il dato della root
+            if selected_item==True and (sl.get_list_index(sel_item_address, index) == -1 or index == len(sel_item_address)):             
+                print(f'{tab_char*tab}{sel_char}{self._data}')            
+            else:
+                print(f'{tab_char*tab}{def_char}{self._data}')
+        if self._children:
+            for i, child in enumerate(self._children):
+                if i == sel_item_address[index] and selected_item:
+                    child.print_tree(sel_item_address, index+1, tab=tab+1, selected_item=True)
+                else:
+                    child.print_tree(sel_item_address, index+1, tab=tab+1, selected_item=False)
+    ##
+    ##### PRIVATE METHODS
+    def __get_node_of_address(self, address, index=0):
+        if self._children:
+            if sl.get_list_index(address, index+1) == -1 or index == len(address)-1:
+                return self._children[address[index]]
+            else:
+                return self._children[address[index]].__get_node_of_address(address, index+1)    
 
+##
+##### MULTI_LEVEL_MENU
+##
 class Multi_level_menu:
     # sel_char : char for the selected items / if you want to creat tree menu
 
@@ -85,7 +110,43 @@ class Multi_level_menu:
         self.sel_char = selected_pre_items_char[0]
         self.def_char = default_pre_items_char[0]
         self.__address = self.__calculate_address_lenght()        
+    ##
+    ##### PUBLIC METHODS
+    def get_root_copy(self):
+        return self.__root.copy()
 
+    def start_menu(self):  # for selcte item click 'KEY_RIGHT' or enter / it return the index ant the content of chosing item
+        self.__change_adress()
+        with Input(keynames='curses') as input_generator:
+            sl.clear()
+            print(f'{self.__address}') #! DA TOGLIERE
+            print()
+            self.__root.print_tree(sel_item_address=self.__address)
+            for _input in input_generator:
+                if _input == 'KEY_UP':
+                    self.__change_adress('up')
+                elif _input == 'KEY_DOWN':
+                    self.__change_adress('down')
+                elif _input == 'KEY_RIGHT':
+                    self.__change_adress('right')
+                elif _input == 'KEY_LEFT':
+                    self.__change_adress('left')
+                elif _input == '\n':
+                    ret_data = self.__change_adress('enter')
+                    if ret_data != None:
+                        sl.clear()
+                        print(f'{self.__address}') #! DA TOGLIERE
+                        print()
+                        self.__root.print_tree(sel_item_address=self.__address)
+                        print('return:  ' + ret_data)
+                        return ret_data                        
+                
+                sl.clear()
+                print(f'{self.__address}') #! DA TOGLIERE
+                print()
+                self.__root.print_tree(sel_item_address=self.__address)
+    ##
+    ##### PRIVATE METHODS
     def __create_tree(self, tree_map) -> Node_menu:
         def create_branchs(branch_map, parent_node):            
             opened_brachets = 0
@@ -109,7 +170,7 @@ class Multi_level_menu:
                     str_branch = ''
                     continue       
                 str_branch += char            
-        root = Node_menu('@')
+        root = Node_menu('root__')
         create_branchs(tree_map, root)       
         return root
                            
@@ -119,9 +180,14 @@ class Multi_level_menu:
             address.append(-1)
         return address
 
-    def __change_adress(self, movement='none'):
+    def __change_adress(self, movement='none'):   
+        is_leaf = self.__root.is_leaf_the_address(self.__address)
+        enter = False     
         address_copy = self.__address.copy()
         movement = movement.upper()
+        if movement == 'ENTER':
+            enter = True  
+            movement = 'RIGHT'
         if movement == 'UP' or movement == 'DOWN':
             for i in range(len(self.__address)):
                 if self.__address[i] == -1:
@@ -148,40 +214,20 @@ class Multi_level_menu:
                 elif self.__address[i] == -1 and movement == 'LEFT' and i-1 != 0:
                     self.__address[i-1] = -1
                     break
-                elif i+1 == len(self.__address):
+                elif i+1 == len(self.__address) and movement == 'LEFT':
                     self.__address[i] = -1
                     break
 
-        if self.__root.check_address(self.__address) == False: self.__address = address_copy
-
-    def start_menu(self):  # for selcte item click 'KEY_RIGHT' or enter / it return the index ant the content of chosing item
-        self.__change_adress()
-        with Input(keynames='curses') as input_generator:
-            sl.clear()
-            print(f'{self.__address}')
-            print()
-            self.__root.print_tree(sel_item_address=self.__address)
-            for _input in input_generator:
-                if _input == 'KEY_UP':
-                    self.__change_adress('up')
-                elif _input == 'KEY_DOWN':
-                    self.__change_adress('down')
-                elif _input == 'KEY_RIGHT':
-                    self.__change_adress('right')
-                elif _input == 'KEY_LEFT':
-                    self.__change_adress('left')
-                elif _input == '\n':
-                    break
-
-                sl.clear()
-                print(f'{self.__address}')
-                print()
-                self.__root.print_tree(sel_item_address=self.__address)
+        if self.__root.check_address(self.__address) == False: 
+            self.__address = address_copy
+        if enter == True and self.__root.is_leaf_the_address(self.__address) and is_leaf:             
+            return self.__root.get_data_of_address(self.__address)    
 
 
 
 if __name__ == '__main__':    
     sl.clear()
     m = Multi_level_menu(menu_map='fi(ff-ss)-sec(cc-dd(rr(ww-ee-tt)-mm))')    
-    m.start_menu()    
+    r = m.start_menu()    
+
     pass
