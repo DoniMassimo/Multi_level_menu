@@ -1,8 +1,16 @@
-# use python 3.8.10 or less
+# v1.0
 # librery to install to use this library
 #   curtsies -> terminal command : 'pip install curtsies'
+# if python doesn't find curtsies library, use python 3.8 or less
 
-from os import terminal_size
+#### COME UTILIZZARE IL FRAMEWORK: si possono creare oggetti di Classe 'Multi_level_menu', al costruttore passiamo un stringa che
+#### rappresnta la nostra struttare ad albero, in seguito possiamo chiamre la funzione start_menu() che stampera e permettera di interagire 
+#### con il menu, quando si preme invio su un nodo finale (nodo senza sotto nodi) la funzione restituisce il nome del nodo selezionato. 
+#### Per muoversi all'interno del menu usare le freccie
+#### formato stringa da passare al costruttore: ogni elemnto è diviso da '-', e sotto elemnti vanno messi tra parentesi ()
+#### Nel main trovi un esempio di oggetto di classe 'Milti_lvel_menu' 
+
+import os, platform
 import support_library_v1 as sl
 from curtsies import Input
 
@@ -98,17 +106,14 @@ class Node_menu(Node):
                 return self._children[address[index]]
             else:
                 return self._children[address[index]].__get_node_of_address(address, index+1)    
-
 ##
 ##### MULTI_LEVEL_MENU
 ##
 class Multi_level_menu:
     # sel_char : char for the selected items / if you want to creat tree menu
 
-    def __init__(self, menu_map:str, default_pre_items_char='-', selected_pre_items_char='#') -> None:
+    def __init__(self, menu_map:str) -> None:
         self.__root = self.__create_tree(menu_map)
-        self.sel_char = selected_pre_items_char[0]
-        self.def_char = default_pre_items_char[0]
         self.__address = self.__calculate_address_lenght()        
     ##
     ##### PUBLIC METHODS
@@ -138,7 +143,6 @@ class Multi_level_menu:
                         print(f'{self.__address}') #! DA TOGLIERE
                         print()
                         self.__root.print_tree(sel_item_address=self.__address)
-                        print('return:  ' + ret_data)
                         return ret_data                        
                 
                 sl.clear()
@@ -227,7 +231,8 @@ class Multi_level_menu:
 
 if __name__ == '__main__':    
     sl.clear()
-    m = Multi_level_menu(menu_map='fi(ff-ss)-sec(cc-dd(rr(ww-ee-tt)-mm))')    
+    m = Multi_level_menu(menu_map='primo elemento(sotto elemento 1(sotto sotto elemento 1-sotto sotto elemento 2)-sotto elemnto 2)-secondo elemento-terzo elemento')    
     r = m.start_menu()    
-
+    print()
+    print('La funzione start menu ha restituito : ' + r)
     pass
