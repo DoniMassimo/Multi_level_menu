@@ -10,7 +10,6 @@
 #### formato stringa da passare al costruttore: ogni elemnto è diviso da '-', e sotto elemnti vanno messi tra parentesi ()
 #### Nel main trovi un esempio di oggetto di classe 'Milti_lvel_menu' 
 
-import os, platform
 import support_library_v1 as sl
 from curtsies import Input
 
