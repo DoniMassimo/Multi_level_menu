@@ -4,7 +4,7 @@
 # if python doesn't find curtsies library, use python 3.8 or less
 
 #### COME UTILIZZARE IL FRAMEWORK: si possono creare oggetti di Classe 'Multi_level_menu', al costruttore passiamo un stringa che
-#### rappresnta la nostra struttare ad albero, in seguito possiamo chiamre la funzione start_menu() che stampera e permettera di interagire 
+#### rappresenta la nostra struttare ad albero, in seguito possiamo chiamre la funzione start_menu() che stampera e permettera di interagire 
 #### con il menu, quando si preme invio su un nodo finale (nodo senza sotto nodi) la funzione restituisce il nome del nodo selezionato. 
 #### Per muoversi all'interno del menu usare le freccie
 #### formato stringa da passare al costruttore: ogni elemnto è diviso da '-', e sotto elemnti vanno messi tra parentesi ()
